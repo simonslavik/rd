@@ -8,6 +8,7 @@ where (Year(sod.ModifiedDate) = '2011' OR Year(sod.ModifiedDate) = '2012') AND (
 
 
 
+
 SELECT  NazevKategorie, SUM(CelkovyProdej) as CelkovýProdej, Rozdíl as RozdílveDnech,Rok, Kvartal, 
 CASE WHEN SUM(CelkovyProdej)<100000 THEN 'Podprumerný prodej'​
      WHEN SUM(CelkovyProdej)>5000000 THEN 'Nadprúmerný prodej'​
@@ -19,7 +20,8 @@ join sales.SalesOrderHeader soh on sod.SalesOrderID=soh.SalesOrderID
 , Production.Product pp
 join Production.ProductSubcategory ps on ps.ProductSubcategoryID=pp.ProductSubcategoryID 
 join Production.ProductCategory pc on pc.ProductCategoryID=ps.ProductCategoryID 
-where (Year(sod.ModifiedDate) = '2011' OR Year(sod.ModifiedDate) = '2012') AND (DATEPART(QUARTER, sod.ModifiedDate) = '4') 
+where (Year(sod.ModifiedDate) = '2011' OR Year(sod.ModifiedDate) = '2012') AND (DATEPART(QUARTER, sod.ModifiedDate) = '4') AND (sod.ProductID = pp.ProductID)
 ) as ss
 group by NazevKategorie, Rozdíl, Kvartal, Rok
 order by Rozdíl DESC
+
