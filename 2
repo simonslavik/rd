@@ -1,36 +1,7 @@
-SELECT sod.SalesOrderID, pc.Name as NazevKategorie,  ps.Name NazevPodKategorie, pp.Name as NazevProduktu, (sod.OrderQty*sod.UnitPrice) as CelkovyProdej, Month(sod.ModifiedDate) as Mesic,
-CASE WHEN (OrderQty*UnitPrice)<1500 THEN 'Podprumerný prodej'​
-     WHEN (OrderQty*UnitPrice)>12000 THEN 'Nadprúmerný prodej'​
-     ELSE 'Prumerný prodej' END AS CustomerCategory​
- FROM sales.SalesOrderDetail sod, Production.Product pp
+SELECT sod.SalesOrderID, pc.Name as NazevKategorie,  ps.Name NazevPodKategorie, pp.Name as NazevProduktu, OrderDate as DatumObjednáni, ShipDate as DatumOdesláni, Day(ShipDate) - Day(OrderDate)  AS Rozdíl, sod.OrderQty*sod.UnitPrice as CelkovyProdej, Year(sod.ModifiedDate) as Rok, Month(sod.ModifiedDate) as Mesic, DATEPART(QUARTER, sod.ModifiedDate) as Kvartal
+FROM sales.SalesOrderDetail sod 
+join sales.SalesOrderHeader soh on sod.SalesOrderID=soh.SalesOrderID 
+, Production.Product pp
 join Production.ProductSubcategory ps on ps.ProductSubcategoryID=pp.ProductSubcategoryID 
 
 join Production.ProductCategory pc on pc.ProductCategoryID=ps.ProductCategoryID 
-
-where sod.ProductID = pp.ProductID AND YEAR(sod.ModifiedDate) = '2011' AND DATEPART(QUARTER, sod.ModifiedDate) = 4 AND ps.Name LIKE 'Mountain%'
-
-order by pc.Name, CustomerCategory​
-
-use AdventureWorksDW2017 
-
-
-
-select distinct dp.productkey, dp.englishproductname, dps.englishproductsubcategoryname, dpc.englishproductcategoryname,dst.salesterritoryregion, fis.salesamount, dd.englishmonthname, count(fis.orderquantity)as pocet, (fis.salesamount*count(fis.orderquantity))as obrat 
-
-from factinternetsales fis 
-
-join dimproduct dp on fis.productkey=dp.productkey 
-
-join dimproductsubcategory dps on dp.productsubcategorykey=dps.productsubcategorykey 
-
-join dimproductcategory dpc on dps.ProductCategoryKey=dpc.ProductCategoryKey 
-
-join dimsalesterritory dst on fis.SalesTerritoryKey=dst.SalesTerritoryKey 
-
-join dimdate dd on dd.DateKey=fis.OrderDateKey 
-
-group by dp.productkey, dp.englishproductname, dps.englishproductsubcategoryname,dpc.englishproductcategoryname,dst.salesterritoryregion, fis.salesamount, dd.englishmonthname, fis.orderdate 
-
-having fis.salesamount*count(fis.orderquantity)>2500 and year(orderdate)='2012' and (dst.SalesTerritoryRegion like 'Germany' or dst.SalesTerritoryRegion like 'France') 
-
-order by dst.SalesTerritoryRegion
