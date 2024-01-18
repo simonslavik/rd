@@ -42,12 +42,12 @@ order by SalesOrderID ,Rok
 
 
 
-SELECT  NazevKategorie, SUM(CelkovyProdej) as CelkovýProdej, Max(Rozdíl) as RozdílveDnech,Rok, Kvartal, 
+SELECT  NazevKategorie, SUM(CelkovyProdej) as CelkovýProdej, Min(Rozdíl) as RozdílveDnech,Rok, Kvartal, 
 CASE WHEN SUM(CelkovyProdej)<100000 THEN 'Podprumerný prodej'​
      WHEN SUM(CelkovyProdej)>5000000 THEN 'Nadprúmerný prodej'​
      ELSE 'Prumerný prodej' END AS Výsledek
 FROM (
-SELECT sod.SalesOrderID, pc.Name as NazevKategorie,  ps.Name NazevPodKategorie, pp.Name as NazevProduktu, OrderDate as DatumObjednáni, ShipDate as DatumOdesláni, Day(ShipDate) - Day(OrderDate)  AS Rozdíl, sod.OrderQty*sod.UnitPrice as CelkovyProdej, Year(sod.ModifiedDate) as Rok, Month(sod.ModifiedDate) as Mesic, DATEPART(QUARTER, sod.ModifiedDate) as Kvartal
+SELECT sod.SalesOrderID, pc.Name as NazevKategorie,  ps.Name NazevPodKategorie, pp.Name as NazevProduktu, OrderDate as DatumObjednáni, ShipDate as DatumOdesláni,Day(OrderDate) -  Day(ShipDate)  AS Rozdíl, sod.OrderQty*sod.UnitPrice as CelkovyProdej, Year(sod.ModifiedDate) as Rok, Month(sod.ModifiedDate) as Mesic, DATEPART(QUARTER, sod.ModifiedDate) as Kvartal
 FROM sales.SalesOrderDetail sod 
 join sales.SalesOrderHeader soh on sod.SalesOrderID=soh.SalesOrderID 
 , Production.Product pp
@@ -71,5 +71,6 @@ where (sod.ProductID = pp.ProductID)
 ) as ss
 group by SalesOrderID,  Kvartal, Rok
 order by SalesOrderID ,Rok 
+
 
 
