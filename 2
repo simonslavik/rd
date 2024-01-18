@@ -42,7 +42,7 @@ order by SalesOrderID ,Rok
 
 
 
-SELECT  NazevKategorie, SUM(CelkovyProdej) as CelkovýProdej, AVG(Rozdíl) as RozdílveDnech,Rok, Kvartal, 
+SELECT  NazevKategorie, SUM(CelkovyProdej) as CelkovýProdej, Max(Rozdíl) as RozdílveDnech,Rok, Kvartal, 
 CASE WHEN SUM(CelkovyProdej)<100000 THEN 'Podprumerný prodej'​
      WHEN SUM(CelkovyProdej)>5000000 THEN 'Nadprúmerný prodej'​
      ELSE 'Prumerný prodej' END AS Výsledek
@@ -71,4 +71,5 @@ where (sod.ProductID = pp.ProductID)
 ) as ss
 group by SalesOrderID,  Kvartal, Rok
 order by SalesOrderID ,Rok 
+
 
