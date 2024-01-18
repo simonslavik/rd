@@ -4,8 +4,7 @@ join sales.SalesOrderHeader soh on sod.SalesOrderID=soh.SalesOrderID
 , Production.Product pp
 join Production.ProductSubcategory ps on ps.ProductSubcategoryID=pp.ProductSubcategoryID 
 join Production.ProductCategory pc on pc.ProductCategoryID=ps.ProductCategoryID 
-where (Year(sod.ModifiedDate) = '2011' OR Year(sod.ModifiedDate) = '2012') AND (DATEPART(QUARTER, sod.ModifiedDate) = '4') AND (sod.ProductID = pp.ProductID)
-
+where (sod.ProductID = pp.ProductID)
 
 
 
@@ -20,8 +19,9 @@ join sales.SalesOrderHeader soh on sod.SalesOrderID=soh.SalesOrderID
 , Production.Product pp
 join Production.ProductSubcategory ps on ps.ProductSubcategoryID=pp.ProductSubcategoryID 
 join Production.ProductCategory pc on pc.ProductCategoryID=ps.ProductCategoryID 
-where (Year(sod.ModifiedDate) = '2011' OR Year(sod.ModifiedDate) = '2012') AND (DATEPART(QUARTER, sod.ModifiedDate) = '4') AND (sod.ProductID = pp.ProductID)
+where (sod.ProductID = pp.ProductID)
 ) as ss
 group by NazevKategorie, Rozdíl, Kvartal, Rok
+Having  Rok = '2011' OR Rok = '2012' AND Kvartal = '4'
 order by Rozdíl DESC
 
