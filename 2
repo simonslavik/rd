@@ -25,3 +25,15 @@ group by NazevKategorie, Rozdíl, Kvartal, Rok
 Having ( Rok = '2011' OR Rok = '2012') AND Kvartal = '4'
 order by NazevKategorie ,Rok 
 
+SELECT SalesOrderID , SUM(CelkovyProdej) as CelkovýProdej, Rok, Kvartal
+FROM (
+SELECT sod.SalesOrderID, pc.Name as NazevKategorie,  ps.Name NazevPodKategorie, pp.Name as NazevProduktu, OrderDate as DatumObjednáni, ShipDate as DatumOdesláni, Day(ShipDate) - Day(OrderDate)  AS Rozdíl, sod.OrderQty*sod.UnitPrice as CelkovyProdej, Year(sod.ModifiedDate) as Rok, Month(sod.ModifiedDate) as Mesic, DATEPART(QUARTER, sod.ModifiedDate) as Kvartal
+FROM sales.SalesOrderDetail sod 
+join sales.SalesOrderHeader soh on sod.SalesOrderID=soh.SalesOrderID 
+, Production.Product pp
+join Production.ProductSubcategory ps on ps.ProductSubcategoryID=pp.ProductSubcategoryID 
+join Production.ProductCategory pc on pc.ProductCategoryID=ps.ProductCategoryID 
+where (sod.ProductID = pp.ProductID)
+) as ss
+group by SalesOrderID,  Kvartal, Rok
+order by SalesOrderID ,Rok 
