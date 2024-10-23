@@ -1,76 +1,118 @@
-SELECT sod.SalesOrderID, pc.Name as NazevKategorie,  ps.Name NazevPodKategorie, pp.Name as NazevProduktu, OrderDate as DatumObjednáni, ShipDate as DatumOdesláni, Day(ShipDate) - Day(OrderDate)  AS Rozdíl, sod.OrderQty*sod.UnitPrice as CelkovyProdej, Year(sod.ModifiedDate) as Rok, Month(sod.ModifiedDate) as Mesic, DATEPART(QUARTER, sod.ModifiedDate) as Kvartal
-FROM sales.SalesOrderDetail sod 
-join sales.SalesOrderHeader soh on sod.SalesOrderID=soh.SalesOrderID 
-, Production.Product pp
-join Production.ProductSubcategory ps on ps.ProductSubcategoryID=pp.ProductSubcategoryID 
-join Production.ProductCategory pc on pc.ProductCategoryID=ps.ProductCategoryID 
-where (sod.ProductID = pp.ProductID)
+CREATE TABLE clenove_rodiny (
+    ID INT PRIMARY KEY,
+    Jmeno VARCHAR(20)
+);
+CREATE TABLE produkty (
+    IDProdukt INT PRIMARY KEY,
+    Druh VARCHAR(20),
+    Skupina VARCHAR(20),
+    Produkt VARCHAR(20)
+);
+
+CREATE TABLE dim_datum (
+     dat_id integer primary key,
+     datum smalldatetime,
+     den smallint,
+     mesic smallint,
+     kvartal varchar(4),
+     rok smallint
+);
+
+CREATE TABLE Rozpocet (
+    Dim_Clen INT,
+    Dim_Produkt INT,
+    Dim_Datum DATE,
+    Vydaj MONEY,
+    PRIMARY KEY (Dim_Clen, Dim_Produkt, Dim_Datum),
+    FOREIGN KEY (Dim_Clen) REFERENCES clenove_rodiny(ID),
+    FOREIGN KEY (Dim_Produkt) REFERENCES produkty(IDProdukt),  
+    FOREIGN KEY (Dim_Datum) REFERENCES dim_datum(dat_id)         
+);
+
+set datefirst 1
+     declare
+     @start_date datetime
+     ,@end_date datetime
+     ,@loop_day datetime
+     ,@diff int
+     ,@loop int
+     
+Select
+     @start_date ='20040101'
+     ,@end_date = '20040331'
+     ,@loop = 0
+     
+select
+     @diff = datediff(dd,@start_date,@end_date)
+     while @loop <= @diff
+     begin
+     select @loop_day =
+     dateadd(dd,@loop,@start_date)
+     insert into [dim_datum]
+     select
+     @loop
+     ,@loop_day
+     ,datepart(dd,@loop_day)
+     ,datepart(mm,@loop_day)
+     ,'Q'+convert(varchar,datepart(qq,@loop_day))
+     ,datepart(yy,@loop_day)
 
 
 
-SELECT  NazevKategorie, SUM(CelkovyProdej) as CelkovýProdej, Rozdíl as RozdílveDnech,Rok, Kvartal, 
-CASE WHEN SUM(CelkovyProdej)<100000 THEN 'Podprumerný prodej'​
-     WHEN SUM(CelkovyProdej)>5000000 THEN 'Nadprúmerný prodej'​
-     ELSE 'Prumerný prodej' END AS Výsledek
-FROM (
-SELECT sod.SalesOrderID, pc.Name as NazevKategorie,  ps.Name NazevPodKategorie, pp.Name as NazevProduktu, OrderDate as DatumObjednáni, ShipDate as DatumOdesláni, Day(ShipDate) - Day(OrderDate)  AS Rozdíl, sod.OrderQty*sod.UnitPrice as CelkovyProdej, Year(sod.ModifiedDate) as Rok, Month(sod.ModifiedDate) as Mesic, DATEPART(QUARTER, sod.ModifiedDate) as Kvartal
-FROM sales.SalesOrderDetail sod 
-join sales.SalesOrderHeader soh on sod.SalesOrderID=soh.SalesOrderID 
-, Production.Product pp
-join Production.ProductSubcategory ps on ps.ProductSubcategoryID=pp.ProductSubcategoryID 
-join Production.ProductCategory pc on pc.ProductCategoryID=ps.ProductCategoryID 
-where (sod.ProductID = pp.ProductID)
-) as ss
-group by NazevKategorie, Rozdíl, Kvartal, Rok
-Having ( Rok = '2011' OR Rok = '2012') AND Kvartal = '4'
-order by NazevKategorie ,Rok 
+select
+     @loop = @loop + 1
+     end
 
-SELECT SalesOrderID , SUM(CelkovyProdej) as CelkovýProdej, Rok, Kvartal
-FROM (
-SELECT sod.SalesOrderID, pc.Name as NazevKategorie,  ps.Name NazevPodKategorie, pp.Name as NazevProduktu, OrderDate as DatumObjednáni, ShipDate as DatumOdesláni, Day(ShipDate) - Day(OrderDate)  AS Rozdíl, sod.OrderQty*sod.UnitPrice as CelkovyProdej, Year(sod.ModifiedDate) as Rok, Month(sod.ModifiedDate) as Mesic, DATEPART(QUARTER, sod.ModifiedDate) as Kvartal
-FROM sales.SalesOrderDetail sod 
-join sales.SalesOrderHeader soh on sod.SalesOrderID=soh.SalesOrderID 
-, Production.Product pp
-join Production.ProductSubcategory ps on ps.ProductSubcategoryID=pp.ProductSubcategoryID 
-join Production.ProductCategory pc on pc.ProductCategoryID=ps.ProductCategoryID 
-where (sod.ProductID = pp.ProductID)
-) as ss
-group by SalesOrderID,  Kvartal, Rok
-order by SalesOrderID ,Rok 
+INSERT INTO clenove_rodiny VALUES (1, 'Jan Novák');
+INSERT INTO clenove_rodiny VALUES (2, 'Marta Nováková');
+INSERT INTO clenove_rodiny VALUES (3, 'Mirek Novák');
+INSERT INTO clenove_rodiny VALUES (4, 'Zuzka Nováková');
 
+INSERT INTO produkty VALUES (1, 'potraviny', 'nápoj', 'mléko');
+INSERT INTO produkty VALUES (2, 'potraviny', 'nápoj', 'pivo');
+INSERT INTO produkty VALUES (3, 'potraviny', 'peèivo', 'chléb');
+INSERT INTO produkty VALUES (4, 'potraviny', 'peèivo', 'rohlíky');
+INSERT INTO produkty VALUES (5, 'jiné', 'doprava', 'benzín');
+INSERT INTO produkty VALUES (6, 'jiné', 'doprava', 'jízdenky');
+INSERT INTO produkty VALUES (7, 'jiné', 'služby', 'holiè');
+INSERT INTO produkty VALUES (8, 'kultura', 'vstupné', 'kino');
+INSERT INTO produkty VALUES (9, 'kultura', 'vstupné', 'divadlo');
+INSERT INTO produkty VALUES (10, 'kultura', 'media', 'kazety VHS');
 
-
-
+INSERT INTO rozpocet VALUES (1, 2, 1, 155.20);
+INSERT INTO rozpocet VALUES (1, 2, 6, 90);
+INSERT INTO rozpocet VALUES (1, 2, 9, 57.10);
+INSERT INTO rozpocet VALUES (1, 5, 4, 888.10);
+INSERT INTO rozpocet VALUES (1, 5, 14, 742);
+INSERT INTO rozpocet VALUES (2, 1, 1, 64.70);
+INSERT INTO rozpocet VALUES (2, 1, 2, 37.70);
+INSERT INTO rozpocet VALUES (3, 6, 5, 40);
+INSERT INTO rozpocet VALUES (3, 8, 10, 140);
+INSERT INTO rozpocet VALUES (4, 7, 16, 210);
+INSERT INTO rozpocet VALUES (4, 9, 18, 100);
 
 
-SELECT  NazevKategorie, SUM(CelkovyProdej) as CelkovýProdej, Min(Rozdíl) as RozdílveDnech,Rok, Kvartal, 
-CASE WHEN SUM(CelkovyProdej)<100000 THEN 'Podprumerný prodej'​
-     WHEN SUM(CelkovyProdej)>5000000 THEN 'Nadprúmerný prodej'​
-     ELSE 'Prumerný prodej' END AS Výsledek
-FROM (
-SELECT sod.SalesOrderID, pc.Name as NazevKategorie,  ps.Name NazevPodKategorie, pp.Name as NazevProduktu, OrderDate as DatumObjednáni, ShipDate as DatumOdesláni,Day(OrderDate) -  Day(ShipDate)  AS Rozdíl, sod.OrderQty*sod.UnitPrice as CelkovyProdej, Year(sod.ModifiedDate) as Rok, Month(sod.ModifiedDate) as Mesic, DATEPART(QUARTER, sod.ModifiedDate) as Kvartal
-FROM sales.SalesOrderDetail sod 
-join sales.SalesOrderHeader soh on sod.SalesOrderID=soh.SalesOrderID 
-, Production.Product pp
-join Production.ProductSubcategory ps on ps.ProductSubcategoryID=pp.ProductSubcategoryID 
-join Production.ProductCategory pc on pc.ProductCategoryID=ps.ProductCategoryID 
-where (sod.ProductID = pp.ProductID)
-) as ss
-group by NazevKategorie, Rok, Kvartal
-Having ( Rok = '2011' OR Rok = '2012') AND Kvartal = '4' 
-order by NazevKategorie ,Rok 
 
-SELECT SalesOrderID , SUM(CelkovyProdej) as CelkovýProdej, Rok, Kvartal
-FROM (
-SELECT sod.SalesOrderID, pc.Name as NazevKategorie,  ps.Name NazevPodKategorie, pp.Name as NazevProduktu, OrderDate as DatumObjednáni, ShipDate as DatumOdesláni, Day(ShipDate) - Day(OrderDate)  AS Rozdíl, sod.OrderQty*sod.UnitPrice as CelkovyProdej, Year(sod.ModifiedDate) as Rok, Month(sod.ModifiedDate) as Mesic, DATEPART(QUARTER, sod.ModifiedDate) as Kvartal
-FROM sales.SalesOrderDetail sod 
-join sales.SalesOrderHeader soh on sod.SalesOrderID=soh.SalesOrderID 
-, Production.Product pp
-join Production.ProductSubcategory ps on ps.ProductSubcategoryID=pp.ProductSubcategoryID 
-join Production.ProductCategory pc on pc.ProductCategoryID=ps.ProductCategoryID 
-where (sod.ProductID = pp.ProductID)
-) as ss
-group by SalesOrderID,  Kvartal, Rok
-order by SalesOrderID ,Rok 
+INSERT INTO rozpocet VALUES (1, 2, 41, 78.20);
+INSERT INTO rozpocet VALUES (1, 2, 56, 55);
+INSERT INTO rozpocet VALUES (1, 2, 59, 68.10);
+INSERT INTO rozpocet VALUES (1, 5, 34, 324.10);
+INSERT INTO rozpocet VALUES (1, 5, 34, 698);
+INSERT INTO rozpocet VALUES (2, 1, 41, 99.70);
+INSERT INTO rozpocet VALUES (2, 1, 52, 77.70);
+INSERT INTO rozpocet VALUES (3, 6, 45, 66);
+INSERT INTO rozpocet VALUES (3, 8, 30, 155);
+INSERT INTO rozpocet VALUES (4, 7, 46, 244);
+INSERT INTO rozpocet VALUES (4, 9, 58, 255);
 
-
+INSERT INTO rozpocet VALUES (1, 2, 71, 154.20);
+INSERT INTO rozpocet VALUES (1, 2, 86, 212);
+INSERT INTO rozpocet VALUES (1, 2, 79, 133);
+INSERT INTO rozpocet VALUES (1, 5, 64, 92);
+INSERT INTO rozpocet VALUES (1, 5, 54, 61);
+INSERT INTO rozpocet VALUES (2, 1, 81, 813);
+INSERT INTO rozpocet VALUES (2, 1, 82, 298);
+INSERT INTO rozpocet VALUES (3, 6, 75, 25);
+INSERT INTO rozpocet VALUES (3, 8, 80, 118);
+INSERT INTO rozpocet VALUES (4, 7, 76, 291);
+INSERT INTO rozpocet VALUES (4, 9, 68, 89);
