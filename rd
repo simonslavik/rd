@@ -73,3 +73,18 @@ end
 SELECT CustomerID, ContactName, City, Region, Country
 INTO dim_zakaznik
 FROM Northwind..Customers;
+
+
+SELECT 
+    od.ProductId, 
+    od.UnitPrice, 
+    od.Quantity, 
+    o.CustomerID, 
+    o.OrderDate
+INTO fact_table
+FROM 
+    Northwind.dbo.Orders o 
+JOIN 
+    Northwind.dbo.OrderDetails od ON o.OrderID = od.OrderID;
+
+
