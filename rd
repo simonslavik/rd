@@ -87,4 +87,14 @@ FROM
 JOIN 
     Northwind.dbo.OrderDetails od ON o.OrderID = od.OrderID;
 
+SELECT 
+    p.ProductID, 
+    p.ProductName, 
+    c.CategoryName
+INTO dim_product
+FROM 
+    Northwind.dbo.Products p 
+JOIN 
+    Northwind.dbo.Categories c ON o.CategoryID = od.CategoryID;
+
 
