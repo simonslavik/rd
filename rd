@@ -4,10 +4,10 @@ SELECT
     z.Mesto AS Zakaznik_Mesto,
     z.Region AS Zakaznik_Region,
     z.Zeme AS Zakaznik_Zeme,
-    c.den AS Datum_Den,
-    c.mesic AS Datum_Mesic,
-    c.kvartal AS Datum_Kvartal,
-    c.rok AS Datum_Rok,
+    dd.den AS Datum_Den,
+    dd.mesic AS Datum_Mesic,
+    dd.kvartal AS Datum_Kvartal,
+    dd.rok AS Datum_Rok,
     p.Product AS Produkt_Nazev,
     p.Category AS Produkt_Kategorie,
     dc.Cena AS Cena,
@@ -17,6 +17,6 @@ FROM
 JOIN 
     Dim_Zakaznik z ON dc.Dim_Zak = z.ID
 JOIN 
-    Dim_Cas c ON dc.Dim_Cas = c.ID
+    dim_datum dd ON dc.Dim_Cas = c.ID
 JOIN 
-    Dim_Product p ON dc.Dim_Prod = p.ID;
+    dim_product p ON dc.Dim_Prod = p.ID;
